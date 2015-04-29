@@ -1,0 +1,54 @@
+<?php
+
+// Setup Application Document Root
+define('APP_DOC_ROOT', '/my-app');
+
+// Application paths - these should be correct by default
+define('APP_DIR_ROOT', dirname ( dirname ( __FILE__ ) ) );
+define('APP_MODEL',     APP_DIR_ROOT . '/model');
+define('APP_CONTROLLER',APP_DIR_ROOT . '/controller');
+define('APP_VIEW',      APP_DIR_ROOT . '/view');
+define('APP_JSCRIPT',   APP_DOC_ROOT . '/js');
+define('APP_IMG',       APP_DOC_ROOT . '/img');
+define('APP_DEBUG_LOG', APP_DIR_ROOT . '/log/app.log' );
+
+// Set Debug Level (None: 0, Errors: 1, Warnings: 2, Info: 3, Verbose: 4)
+define ( 'APP_DEBUG_LEVEL', 0 );
+
+// Set Debug Logging Level (None: 0, Errors: 1, Warnings: 2, Info: 3, Verbose: 4)
+define ( 'APP_DEBUG_LOG_LEVEL', 0);
+
+// Authentication Type (None: 0, Internal: 1, Database: 2, LDAP: 3)
+define ( 'APP_AUTH_TYPE', 0 );
+
+// User listing file for Internal Users
+//include('userListing.php');
+
+// Application secret for token creation
+define ( 'APP_SECRET', 'THIS_IS_NOT_SECRET_PLEASE_CHANGE' );
+
+// Database Configuration
+/*
+$dbHost = 'localhost';
+$dbName = '[db_name]';
+$dbUser = '[db_user_name]';
+$dbPass = '[db_password]';
+
+$dbh = mysql_pconnect($dbHost, $dbUser, $dbPass)
+    or die('Could not connect to Mysql . mysql_error()');
+
+mysql_select_db('storefront', $dbh)
+    or die('Could not open database' . mysql_error() );
+*/
+
+// Auto load classes
+function __autoload ( $class_name ) {
+    # Look for entity classes
+    if ( file_exists( APP_MODEL . '/entity/' . $class_name . '.php' ) ) {
+        include APP_MODEL . '/entity/' . $class_name . '.php';
+    }
+    # Grab standard class
+    else {
+        include APP_MODEL .'/'. $class_name . '.php';
+    }
+}
