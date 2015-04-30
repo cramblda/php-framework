@@ -236,8 +236,8 @@ class db {
 
     public function dbPrepare ( $sql ) {
 
-        $mesg     = 'Preparing ' . $this->dbType . ' DB SQL statment <br />'.$sql;
-        $logMesg  = 'Preparing ' . $this->dbType . ' DB SQL statment \n\t'.$sql;
+        $mesg     = 'Preparing ' . $this->dbType . ' DB SQL statment <br />' . $sql;
+        $logMesg  = 'Preparing ' . $this->dbType . ' DB SQL statment ' ."\n\t" . $sql;
         $debug = new debug();
         $debug->write_debug( date( 'Y-m-d h:m:s'), 3, $this->appUser, $mesg, $logMesg );
 
@@ -264,7 +264,7 @@ class db {
 
         $mesg     = 'Executing ' . $this->dbType . ' DB SQL statment with Params: </br >';
         $mesg    .= print_r( $params, true );
-        $logMesg  = 'Executing ' . $this->dbType . ' DB SQL statment with Params: \n';
+        $logMesg  = 'Executing ' . $this->dbType . ' DB SQL statment with Params: ' . "\n\t";
         $logMesg .= print_r( $params, true );
 
         $debug = new debug();

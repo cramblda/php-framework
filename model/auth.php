@@ -159,7 +159,7 @@ class auth {
                 $this->user->setUsername( $row['username'] );
 
                 $sql = "SELECT
-                          ar.name as role
+                          ar.name
                         FROM
                           auth_user__auth_role auar
                         JOIN
