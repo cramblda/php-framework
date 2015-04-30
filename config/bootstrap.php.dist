@@ -27,18 +27,14 @@ define ( 'APP_AUTH_TYPE', 0 );
 // Application secret for token creation
 define ( 'APP_SECRET', 'THIS_IS_NOT_SECRET_PLEASE_CHANGE' );
 
-// Database Configuration
 /*
-$dbHost = 'localhost';
-$dbName = '[db_name]';
-$dbUser = '[db_user_name]';
-$dbPass = '[db_password]';
-
-$dbh = mysql_pconnect($dbHost, $dbUser, $dbPass)
-    or die('Could not connect to Mysql . mysql_error()');
-
-mysql_select_db('storefront', $dbh)
-    or die('Could not open database' . mysql_error() );
+// Setup Database Connection
+define ( "APP_DB_TYPE", "mysql"     );
+define ( "APP_DB_HOST", "localhost" );
+define ( "APP_DB_PORT", "3306"      );
+define ( "APP_DB_NAME", "[db-name]" );
+define ( "APP_DB_USER", "[db-user]" );
+define ( "APP_DB_PASS", "[db-pass]" );
 */
 
 // Auto load classes

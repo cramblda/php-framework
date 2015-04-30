@@ -66,7 +66,7 @@ class auth {
         // If auth is sucsessfull
         if (true === $authSuccsess ) {
 
-            $_SESSION['userName']  = $this->user->getUsername();
+            $_SESSION['username']  = $this->user->getUsername();
             $_SESSION['firstName'] = $this->user->getFirstName();
             $_SESSION['lastName']  = $this->user->getLastName();
             $_SESSION['email']     = $this->user->getEmail();
@@ -83,9 +83,9 @@ class auth {
 
     private function databaseAuth() {
 
-        $token = md5($this->plainPassword . $this->user->getSalt() );
+        $token = md5( $this->user->getSalt() . $this->plainPassword );
 
-        if ( $this->user->getPassword() == $token ) {
+        if ( $this->user->getPassword() === $token ) {
             return true;
         }
 
@@ -150,27 +150,27 @@ class auth {
 
             $dbObj = new db();
             $dbObj->dbPrepare( $sql );
-            $dbObj->dbExecute( array( $this->userName ) );
+            $dbObj->dbExecute( array( $this->username ) );
 
             $row = $dbObj->dbFetch( 'assoc' );
 
-            if ( $row['name'] ) {
+            if ( isset($row['username']) ) {
                 $this->user = new user;
-                $this->user->setEmail($row['email']);
-                $this->user->setFirstName($row['firstName']);
-                $this->user->setLastName($row['lastName']);
-                $this->user->setPassword($row['password']);
-                $this->user->setSalt($row['salt']);
-                $this->user->setUsername($row['username']);
+                $this->user->setEmail( $row['email'] );
+                $this->user->setFirstName( $row['first_name'] );
+                $this->user->setLastName( $row['last_name'] );
+                $this->user->setPassword( $row['password'] );
+                $this->user->setSalt( $row['salt'] );
+                $this->user->setUsername( $row['username'] );
 
                 $sql = "SELECT
-                          ar.role as role
+                          ar.name as role
                         FROM
                           auth_user__auth_role auar
                         JOIN
                           auth_role ar ON auar.role_id = ar.id
                         WHERE
-                          user_id = ?";
+                          auar.user_id = ?";
 
                 $dbObj = new db();
                 $dbObj->dbPrepare( $sql );
@@ -178,7 +178,9 @@ class auth {
 
                 $role = array();
                 while ( $row = $dbObj->dbFetch( 'assoc' ) ) {
-                    $role[] = $row['role'];
+                    if ( isset( $row['name'] ) ) {
+                        $role[] = $row['name'];
+                    }
                 }
 
                 $this->user->setRole($role);

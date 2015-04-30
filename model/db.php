@@ -51,56 +51,59 @@ class db {
     private $dbh;
     private $dsn;
     private $dbType;  // Either mysql, postgres, odbc
-    private $db;      // Either APP or IFAS
     private $dbHost;
     private $dbPort;
     private $dbName;
     private $dbUser;
     private $dbPass;
     private $dbOptions = array( );
+    private $appUser;
+
     public  $dbObj;
     public  $dbRes;
 
 
-    function __construct ( $db = "APP" ) {
 
-        $this->db = $db;
+    /*
+     * On construct, build out database connection using configuration
+     * parameters.
+     *
+     */
+    function __construct () {
+
+        // Set application user, if available, for diagnostic purposes
+        $this->appUser = ( isset($_SESSION['username']) ? $_SESSION['username'] : 'system' );
+
 
         // Load applicable database configuration
-        if ( $this->db == "APP" ) {
-            $this->dbType = APP_DB_TYPE;
-            $this->dbHost = APP_DB_HOST;
-            $this->dbPort = APP_DB_PORT;
-            $this->dbName = APP_DB_NAME;
-            $this->dbUser = APP_DB_USER;
-            $this->dbPass = APP_DB_PASS;
-        }
-        elseif ( $this->db == "IFAS" ) {
-            $this->dbType = IFAS_DB_TYPE;
-            $this->dbHost = IFAS_DB_HOST;
-            $this->dbPort = IFAS_DB_PORT;
-            $this->dbName = IFAS_DB_NAME;
-            $this->dbUser = IFAS_DB_USER;
-            $this->dbPass = IFAS_DB_PASS;
-        }
+        $this->dbType = APP_DB_TYPE;
+        $this->dbHost = APP_DB_HOST;
+        $this->dbPort = APP_DB_PORT;
+        $this->dbName = APP_DB_NAME;
+        $this->dbUser = APP_DB_USER;
+        $this->dbPass = APP_DB_PASS;
 
         // Build correct PDO DSN based on database type
-        if ( $this->dbType == "mysql" ) {
-            $this->dsn = "mysql:host=$this->dbHost;port=$this->dbPort;dbname=$this->dbName";
-        }
-        elseif ( $this->dbType == "postgres" ) {
-            $this->dsn = "pgsql:host=$this->dbHost;port=$this->dbPort;dbname=$this->dbName";
-        }
-        elseif ( $this->dbType == "odbc" ) {
-            $this->dsn = "odbc:$this->dbName";
-        }
-        else {
-            $mesg    = "DB Error " . $this->db . " DB can not process DB Type: " . $this->dbType . "<br />";
-            $logMesg = $mesg;
+        switch( $this->dbType ) {
+            case 'mysql':
+                $this->dsn = "mysql:host=$this->dbHost;port=$this->dbPort;dbname=$this->dbName";
+                break;
 
-            $debug = new debug();
-            $debug->write_debug( date( "Y-m-d h:m:s"), 1, $_SESSION["userName"], $mesg, $logMesg );
-            exit;
+            case 'postgres':
+                $this->dsn = "pgsql:host=$this->dbHost;port=$this->dbPort;dbname=$this->dbName";
+                break;
+
+            case 'odbc':
+                $this->dsn = "odbc:$this->dbName";
+                break;
+
+            default:
+                $mesg    = 'DB Error ' . $this->dbType . ' DB can not process DB Type: ' . $this->dbType . '<br />';
+                $logMesg = $mesg;
+
+                $debug = new debug();
+                $debug->write_debug( date( 'Y-m-d h:m:s'), 1, $this->appUser, $mesg, $logMesg );
+                exit;
         }
 
         // Attempt to build database connection
@@ -108,23 +111,34 @@ class db {
             $this->dbh = new PDO($this->dsn, $this->dbUser , $this->dbPass , $this->dbOptions );
         }
         catch (PDOException $e) {
-            $mesg    = "DB Error for " . $this->db . " - " . $e->getMessage() . "<br />";
+            $mesg    = 'DB Error for ' . $this->dbType . ' database connection - ' . $e->getMessage() . '<br />';
             $logMesg = $mesg;
 
             $debug = new debug();
-            $debug->write_debug( date( "Y-m-d h:m:s"), 1, $_SESSION["userName"], $mesg, $logMesg );
+            $debug->write_debug( date( 'Y-m-d h:m:s'), 1, $this->appUser, $mesg, $logMesg );
             exit;
         }
-
-        //$this->dbh->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING );
     }
 
 
+    /*
+     * On destruct, close database connection.
+     *
+     */
     function __destruct () {
         $this->dbh = null;
     }
 
 
+    /*
+     * Get Database status !Deprecated
+     *
+     * This is a terrible way to get status, as auth_users may not be a table
+     * in every application we write. However, there is no cross platform
+     * PDO status function we can use. Use this method at risk of it's
+     * elimination from future db.php updates.
+     *
+     */
     public function dbStatus () {
         $this->dbRes = $this->dbh->exec("SELECT COUNT(*) FROM auth_users");
         return ( $this->dbh->errorCode() );
@@ -134,9 +148,9 @@ class db {
     public function dbBeginTransaction () {
 
         // Write Debug
-        $mesg  = "Begining " . $this->db . " DB Transaction";
+        $mesg  = 'Begining ' . $this->dbType . ' DB Transaction';
         $debug = new debug();
-        $debug->write_debug( date( "Y-m-d h:m:s"), 3, $_SESSION["userName"], $mesg, $mesg );
+        $debug->write_debug( date( 'Y-m-d h:m:s'), 3, $this->appUser, $mesg, $mesg );
 
         // Start Transaction Mode
         $tranStatus = NULL;
@@ -144,12 +158,12 @@ class db {
 
         // Error Handling
         if ( $tranStatus == 0 ) {
-           $mesg  = "Database " . $this->db . " reported: Begining DB Transaction - Failed";
-           $debug->write_debug( date( "Y-m-d h:m:s"), 1, $_SESSION["userName"], $mesg, $mesg );
+           $mesg  = 'Database ' . $this->dbType . ' reported: Begining DB Transaction - Failed';
+           $debug->write_debug( date( 'Y-m-d h:m:s'), 1, $this->appUser, $mesg, $mesg );
         }
         else {
-           $mesg  = "Database " . $this->db . " reported: Begining DB Transaction - Success";
-           $debug->write_debug( date( "Y-m-d h:m:s"), 3, $_SESSION["userName"], $mesg, $mesg );
+           $mesg  = 'Database ' . $this->dbType . ' reported: Begining DB Transaction - Success';
+           $debug->write_debug( date( 'Y-m-d h:m:s'), 3, $this->appUser, $mesg, $mesg );
         }
     }
 
@@ -157,9 +171,9 @@ class db {
     public function dbRollback () {
 
         // Debug
-        $mesg    = "Performing " . $this->db . " DB Transaction Rollback";
+        $mesg    = 'Performing ' . $this->dbType . ' DB Transaction Rollback';
         $debug = new debug();
-        $debug->write_debug( date( "Y-m-d h:m:s"), 3, $_SESSION["userName"], $mesg, $mesg );
+        $debug->write_debug( date( 'Y-m-d h:m:s'), 3, $this->appUser, $mesg, $mesg );
 
 
         // Rollback Transaction
@@ -169,12 +183,12 @@ class db {
 
         // Error Handling
         if ( $tranStatus == 0 ) {
-           $mesg  = "Database " . $this->db . " reported: DB Transaction Rollback - Failed";
-           $debug->write_debug( date( "Y-m-d h:m:s"), 1, $_SESSION["userName"], $mesg, $mesg );
+           $mesg  = 'Database ' . $this->dbType . ' reported: DB Transaction Rollback - Failed';
+           $debug->write_debug( date( 'Y-m-d h:m:s'), 1, $this->appUser, $mesg, $mesg );
         }
         else {
-           $mesg  = "Database " . $this->db . " reported: DB Transaction Rollback - Success";
-           $debug->write_debug( date( "Y-m-d h:m:s"), 3, $_SESSION["userName"], $mesg, $mesg );
+           $mesg  = 'Database ' . $this->dbType . ' reported: DB Transaction Rollback - Success';
+           $debug->write_debug( date( 'Y-m-d h:m:s'), 3, $this->appUser, $mesg, $mesg );
         }
     }
 
@@ -185,17 +199,17 @@ class db {
 
         if ( $errorCode[1] > 0 ) {
 
-            $mesg  = "A " . $this->db . " database error was detedcted when attempting commit - Performing DB Transaction Rollback";
+            $mesg  = 'A ' . $this->dbType . ' database error was detedcted when attempting commit - Performing DB Transaction Rollback';
             $debug = new debug();
-            $debug->write_debug( date( "Y-m-d h:m:s"), 1, $_SESSION["userName"], $mesg, $mesg );
+            $debug->write_debug( date( 'Y-m-d h:m:s'), 1, $this->appUser, $mesg, $mesg );
 
             $this->dbh->rollBack();
         }
         else {
 
-            $mesg  = "Performing " . $this->db . " DB Transaction Commit";
+            $mesg  = 'Performing ' . $this->dbType . ' DB Transaction Commit';
             $debug = new debug();
-            $debug->write_debug( date( "Y-m-d h:m:s"), 3, $_SESSION["userName"], $mesg, $mesg );
+            $debug->write_debug( date( 'Y-m-d h:m:s'), 3, $this->appUser, $mesg, $mesg );
 
             // Commit Transaction
             $tranStatus = NULL;
@@ -203,12 +217,12 @@ class db {
 
             // Error Handling
             if ( $tranStatus == 0 ) {
-               $mesg  = "Database " . $this->db . " reported: DB Transaction Commit - Failed";
-               $debug->write_debug( date( "Y-m-d h:m:s"), 1, $_SESSION["userName"], $mesg, $mesg );
+               $mesg  = 'Database ' . $this->dbType . ' reported: DB Transaction Commit - Failed';
+               $debug->write_debug( date( 'Y-m-d h:m:s'), 1, $this->appUser, $mesg, $mesg );
             }
             else {
-               $mesg  = "Database " . $this->db . " reported: DB Transaction Commit - Success";
-               $debug->write_debug( date( "Y-m-d h:m:s"), 3, $_SESSION["userName"], $mesg, $mesg );
+               $mesg  = 'Database ' . $this->dbType . ' reported: DB Transaction Commit - Success';
+               $debug->write_debug( date( 'Y-m-d h:m:s'), 3, $this->appUser, $mesg, $mesg );
             }
         }
     }
@@ -222,10 +236,10 @@ class db {
 
     public function dbPrepare ( $sql ) {
 
-        $mesg     = "Preparing " . $this->db . " DB SQL statment <br />".$sql;
-        $logMesg  = "Preparing " . $this->db . " DB SQL statment \n\t".$sql;
+        $mesg     = 'Preparing ' . $this->dbType . ' DB SQL statment <br />'.$sql;
+        $logMesg  = 'Preparing ' . $this->dbType . ' DB SQL statment \n\t'.$sql;
         $debug = new debug();
-        $debug->write_debug( date( "Y-m-d h:m:s"), 3, $_SESSION["userName"], $mesg, $logMesg );
+        $debug->write_debug( date( 'Y-m-d h:m:s'), 3, $this->appUser, $mesg, $logMesg );
 
         $this->dbObj = $this->dbh->prepare( $sql );
 
@@ -233,28 +247,28 @@ class db {
         $errorCode = $this->dbErrorInfo();
         if ( $errorCode[1] > 0 || !is_object($this->dbObj) ) {
 
-            $mesg  = $this->db . " DB Error " . $this->dbErrorCode() . "<br />";
-            $mesg .= "<pre>";
+            $mesg  = $this->dbType . ' DB Error ' . $this->dbErrorCode() . '<br />';
+            $mesg .= '<pre>';
             $mesg .= print_r ( $this->dbErrorInfo(), true );
-            $mesg .= "</pre><br />";
+            $mesg .= '</pre><br />';
 
-            $logMesg = $this->db . " DB Error " . $this->dbErrorCode() . " " . print_r ( $this->dbErrorInfo(), true );
+            $logMesg = $this->dbType . ' DB Error ' . $this->dbErrorCode() . ' ' . print_r ( $this->dbErrorInfo(), true );
 
             $debug = new debug();
-            $debug->write_debug( date( "Y-m-d h:m:s"), 1, $_SESSION["userName"], $mesg, $logMesg );
+            $debug->write_debug( date( 'Y-m-d h:m:s'), 1, $this->appUser, $mesg, $logMesg );
         }
     }
 
 
     public function dbExecute ( $params = NULL ) {
 
-        $mesg     = "Executing " . $this->db . " DB SQL statment with Params: </br >";
+        $mesg     = 'Executing ' . $this->dbType . ' DB SQL statment with Params: </br >';
         $mesg    .= print_r( $params, true );
-        $logMesg  = "Executing " . $this->db . " DB SQL statment with Params: \n";
+        $logMesg  = 'Executing ' . $this->dbType . ' DB SQL statment with Params: \n';
         $logMesg .= print_r( $params, true );
 
         $debug = new debug();
-        $debug->write_debug( date( "Y-m-d h:m:s"), 3, $_SESSION["userName"], $mesg, $logMesg );
+        $debug->write_debug( date( 'Y-m-d h:m:s'), 3, $this->appUser, $mesg, $logMesg );
 
         $params = is_array( $params ) ? $params : array();
         $this->dbRes = $this->dbObj->execute($params);
@@ -263,15 +277,15 @@ class db {
         $errorCode = $this->dbErrorInfo();
         if ( $errorCode[1] > 0 ) {
 
-            $mesg  = $this->db . " DB Error " . $this->dbErrorCode() . "<br />";
-            $mesg .= "<pre>";
+            $mesg  = $this->dbType . ' DB Error ' . $this->dbErrorCode() . '<br />';
+            $mesg .= '<pre>';
             $mesg .= print_r ( $this->dbErrorInfo(), true );
-            $mesg .= "</pre><br />";
+            $mesg .= '</pre><br />';
 
-            $logMesg = $this->db . " DB Error " . $this->dbErrorCode() . " " . print_r ( $this->dbErrorInfo(), true );
+            $logMesg = $this->dbType . ' DB Error ' . $this->dbErrorCode() . ' ' . print_r ( $this->dbErrorInfo(), true );
 
             $debug = new debug();
-            $debug->write_debug( date( "Y-m-d h:m:s"), 1, $_SESSION["userName"], $mesg, $logMesg );
+            $debug->write_debug( date( 'Y-m-d h:m:s'), 1, $this->appUser, $mesg, $logMesg );
         }
 
         return ( $this->dbRes );
@@ -281,11 +295,11 @@ class db {
     public function dbFetch ( $fetchStyle ) {
         # fetchStyle should be one of: all, assoc, both, num, res
 
-        $mesg    = "Executing " . $this->db . " DB data fetch type: ".$fetchStyle;
+        $mesg    = 'Executing ' . $this->dbType . ' DB data fetch type: ' . $fetchStyle;
         $logMesg = $mesg;
 
         $debug = new debug();
-        $debug->write_debug( date( "Y-m-d h:m:s"), 4, $_SESSION["userName"], $mesg, $logMesg );
+        $debug->write_debug( date( 'Y-m-d h:m:s'), 4, $this->appUser, $mesg, $logMesg );
 
     # What type of data should be returned
         switch ( $fetchStyle ) {
@@ -323,7 +337,7 @@ class db {
 
 
     public function dbQuote( $string ) {
-        if ( "odbc" == $this->dbType ) {
+        if ( 'odbc' == $this->dbType ) {
             return( "'" . str_replace( "'", "''", $string ) . "'" );
         }
         else {

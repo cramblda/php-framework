@@ -30,11 +30,11 @@
             </li>
           </ul>
 
-<?php if ( 0 !== APP_AUTH_TYPE && isset($_SESSION["userName"]) ) { ?>
+<?php if ( 0 !== APP_AUTH_TYPE && isset($_SESSION["username"]) ) { ?>
 
           <ul class="nav navbar-nav navbar-right">
             <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><?php print $_SESSION['userName']; ?> <b class="caret"></b></a>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><?php print $_SESSION['username']; ?> <b class="caret"></b></a>
               <ul class="dropdown-menu">
                   <li><a href="#">Profile</a></li>
                   <li><a href="#">Settings</a></li>

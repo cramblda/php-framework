@@ -27,7 +27,7 @@
 
 class debug {
 
-    private $fileHandle
+    private $fileHandle;
     private $appDebugLevel    = APP_DEBUG_LEVEL;
     private $appDebugLogLevel = APP_DEBUG_LOG_LEVEL;
     private $appDebugLog      = APP_DEBUG_LOG;
