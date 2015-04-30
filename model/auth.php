@@ -10,6 +10,10 @@ class auth {
 
 
     public function __construct () {
+
+        defined('APP_AUTH_TYPE') or
+            die ("Configuration Setting: APP_AUTH_TYPE is not set.");
+
         $this->authType = APP_AUTH_TYPE;
         if ( 1 > $this->authType || 3 < $this->authType ) {
             throw new \Exception ('Invalid auth type: ' . $this->authType );
@@ -107,15 +111,18 @@ class auth {
 
     /*
      * Verify if specified username is a valid user of this application.
-     *
      */
     private function userVerify() {
 
         // If Internal user - check config data for user
         if ( 1 == $this->authType ) {
+
+            defined('APP_USER_LISTING') or
+                die ("Configuration Setting: APP_USER_LISTING is not set.");
+
             $userListing = unserialize(APP_USER_LISTING);
 
-            foreach ($userListing as $key => $user) {
+            foreach ( $userListing as $key => $user ) {
                 if ( $this->username === $user['username'] ) {
                     $this->user = new user;
                     $this->user->setEmail($user['email']);

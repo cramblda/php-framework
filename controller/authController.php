@@ -1,5 +1,11 @@
 <?php
 
+// If authentication is not enabled, redirect to home page
+if (0 === APP_AUTH_TYPE) {
+    header ( "Location: " . APP_DOC_ROOT );
+
+}
+
 switch ( $route->getAction() ) {
 
     case 'login':

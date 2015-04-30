@@ -10,6 +10,8 @@ $route = new route();
 session_start();
 
 // User security check
+defined('APP_AUTH_TYPE') or
+    die ("Configuration Setting: APP_AUTH_TYPE is not set.");
 if ( 0 !== APP_AUTH_TYPE && !isset($_SESSION['userName']) && 'auth' != $route->getController() ) {
      $_SESSION = 0;
      session_destroy();
