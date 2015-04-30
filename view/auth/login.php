@@ -36,21 +36,44 @@
                                 <label for="userName">Username</label>
                                 <div class="input-group">
                                     <div class="input-group-addon"><i class="fa fa-user"></i></div>
-                                    <input type="text" class="form-control" id="userName" name="userName" placeholder="Enter Username">
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="userName"
+                                        name="userName"
+                                        placeholder="Enter Username"
+                                        required
+                                        oninvalid="this.setCustomValidity('Username is required.')"
+                                        onchange="this.setCustomValidity('')"
+                                    >
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label for="password">Password</label>
                                 <div class="input-group">
                                     <div class="input-group-addon"><i class="fa fa-key"></i></div>
-                                    <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+                                    <input
+                                        type="password"
+                                        class="form-control"
+                                        id="password"
+                                        name="password"
+                                        placeholder="Password"
+                                        required
+                                        oninvalid="this.setCustomValidity('Password is required.')"
+                                        onchange="this.setCustomValidity('')"
+                                    >
                                 </div>
                             </div>
 
                         </div>
 
                         <div class="panel-footer">
-                            <button type="submit" class="btn btn-primary pull-right" id="loginFormButton" name="loginFormButton">Login</button>
+                            <button
+                                type="submit"
+                                class="btn btn-primary pull-right"
+                                id="loginFormButton"
+                                name="loginFormButton"
+                            >Login</button>
                             <div class="clearfix"></div>
                         </div>
 
