@@ -3,7 +3,7 @@
 class auth {
 
     private $authMessage;
-    private $authType;      // 1 = Internal, 2 = Database, 3 = LDAP
+    private $authType;      // 1 = Internal, 2 = Database
     private $user;
     private $username;
     private $plainPassword;
@@ -15,7 +15,7 @@ class auth {
             die ("Configuration Setting: APP_AUTH_TYPE is not set.");
 
         $this->authType = APP_AUTH_TYPE;
-        if ( 1 > $this->authType || 3 < $this->authType ) {
+        if ( 1 > $this->authType || 2 < $this->authType ) {
             throw new \Exception ('Invalid auth type: ' . $this->authType );
         }
     }
@@ -52,9 +52,6 @@ class auth {
             elseif ( 2 == $this->authType ) {
                 $authSuccsess = $this->databaseAuth();
             }
-            elseif ( $this->authType == 3 ) {
-                $authSuccsess = $this->ldapAuth();
-            }
         }
         else {
             $this->authMessage[] =
@@ -81,8 +78,10 @@ class auth {
     }
 
 
+    /*
+     * Check database based authentication
+     */
     private function databaseAuth() {
-
         $token = md5( $this->user->getSalt() . $this->plainPassword );
 
         if ( $this->user->getPassword() === $token ) {
@@ -93,20 +92,16 @@ class auth {
     }
 
 
+    /*
+     * Check internal (in-memory) authentication
+     */
     private function internalAuth() {
-
         if ( $this->user->getPassword() == $this->plainPassword ) {
             return true;
         }
 
         return false;
     }
-
-
-    private function ldapAuth() {
-
-    }
-
 
 
     /*

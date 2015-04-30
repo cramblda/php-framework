@@ -18,7 +18,7 @@ define ( 'APP_DEBUG_LEVEL', 0 );
 // Set Debug Logging Level (None: 0, Errors: 1, Warnings: 2, Info: 3, Verbose: 4)
 define ( 'APP_DEBUG_LOG_LEVEL', 0);
 
-// Authentication Type (None: 0, Internal: 1, Database: 2, LDAP: 3)
+// Authentication Type (None: 0, Internal: 1, Database: 2)
 define ( 'APP_AUTH_TYPE', 0 );
 
 // User listing file for Internal Users
