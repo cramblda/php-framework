@@ -16,7 +16,7 @@ if ( 0 !== APP_AUTH_TYPE && !isset($_SESSION['username']) && 'auth' != $route->g
      $_SESSION = 0;
      session_destroy();
      session_start();
-     header ( 'Location: auth/login' );
+     header ( 'Location: ' . APP_DOC_ROOT . '/auth/login' );
 }
 
 // Route request to desired controller
