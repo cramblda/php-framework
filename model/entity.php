@@ -2,6 +2,7 @@
 
 class entity {
 
+    protected $db;
     protected $dirtyColumn;
 
 

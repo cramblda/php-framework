@@ -109,6 +109,11 @@ class db {
         // Attempt to build database connection
         try {
             $this->dbh = new PDO($this->dsn, $this->dbUser , $this->dbPass , $this->dbOptions);
+
+            // Force MSSQL server to lower case column names
+            if ('mssql' == $this->dbType) {
+                $this->dbh->setAttribute(PDO::ATTR_CASE, PDO::CASE_LOWER);
+            }
         }
         catch (PDOException $e) {
             $mesg    = 'DB Error for ' . $this->dbType . ' database connection - ' . $e->getMessage() . '<br />';

@@ -9,6 +9,10 @@ $route = new route();
 // Start session to track user
 session_start();
 
+// Intitalize Flash Message
+$_SESSION['flashMessage'] = null;
+
+
 // User security check
 defined('APP_AUTH_TYPE') or
     die ("Configuration Setting: APP_AUTH_TYPE is not set.");
