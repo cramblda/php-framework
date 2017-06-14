@@ -3,10 +3,14 @@
 class route {
 
     private $params;
-
+    private $docRoot;
 
     public function __construct() {
-        $this->params = $this->proccessRequestURI();
+        defined('APP_DOC_ROOT') or
+            die ('Configuration Setting: APP_DOC_ROOT is not set.');
+        
+        $this->docRoot = APP_DOC_ROOT;
+        $this->params  = $this->proccessRequestURI();
     }
 
 
@@ -23,8 +27,9 @@ class route {
     }
 
     private function proccessRequestURI() {
-        $array = explode('/', $_SERVER['REQUEST_URI']);
-        array_shift($array);
+        $uri = str_replace($this->docRoot, '', $_SERVER['REQUEST_URI']);
+        $array = explode('/', $uri);
+
         array_shift($array);
 
         while (1 < count($array) && null == $array[count($array)-1]) {
